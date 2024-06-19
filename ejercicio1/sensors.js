@@ -1,4 +1,13 @@
-class Sensor {}
+class Sensor {
+    constructor(id, type, value, unit, updated_at) {
+        this.id = id;
+        this.type = type;
+        this.value = value;
+        this.unit = unit;
+        this.updated_at = updated_at;
+        this.updateValue = null;
+    }
+}
 
 class SensorManager {
     constructor() {
