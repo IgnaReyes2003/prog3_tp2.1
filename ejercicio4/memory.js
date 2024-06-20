@@ -10,15 +10,15 @@ class Card {
         const cardElement = document.createElement("div");
         cardElement.classList.add("cell");
         cardElement.innerHTML = `
-          <div class="card" data-name="${this.name}">
-              <div class="card-inner">
-                  <div class="card-front"></div>
-                  <div class="card-back">
-                      <img src="${this.img}" alt="${this.name}">
-                  </div>
-              </div>
-          </div>
-      `;
+            <div class="card" data-name="${this.name}">
+                <div class="card-inner">
+                    <div class="card-front"></div>
+                    <div class="card-back">
+                        <img src="${this.img}" alt="${this.name}">
+                    </div>
+                </div>
+            </div>
+        `;
         return cardElement;
     }
 
@@ -30,6 +30,20 @@ class Card {
     #unflip() {
         const cardElement = this.element.querySelector(".card");
         cardElement.classList.remove("flipped");
+    }
+
+    //Definir el método `toggleFlip()` que cambia el estado de volteo de la carta en función de su estado actual.
+    toggleFlip() {
+        if (this.isFlipped) {
+            this.#unflip();
+        } else {
+            this.#flip();
+        }
+        this.isFlipped = !this.isFlipped;
+    }
+    //Implementar el método `matches(otherCard)` que verifica si la carta actual coincide con otra carta.
+    matches(otherCard) {
+        return this.name === otherCard.name;
     }
 }
 
@@ -69,6 +83,36 @@ class Board {
         });
     }
 
+    //Implementar el método `shuffleCards()` que mezcla las cartas del tablero.
+    shuffleCards() {
+        for (let i = this.cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+        }
+    }
+
+    //Implementar el método `reset()` que reinicia el tablero.
+    reset() {
+        this.shuffleCards();
+        this.render();
+    }
+
+    //Implementar el método `flipDownAllCards()` que posiciona todas las cartas en su estado inicial. Es necesario para reiniciar el tablero.
+    flipDownAllCards() {
+        this.cards.forEach((card) => {
+            if (card.isFlipped) {
+                card.toggleFlip();
+            }
+        });
+    }
+
+    // Implementar el método `reset()` que reinicia el tablero. Debe emplear otros métodos de la clase `Board` para realizar esta tarea.
+    reset() {
+        this.shuffleCards();
+        this.flipDownAllCards();
+        this.render();
+    }
+
     onCardClicked(card) {
         if (this.onCardClick) {
             this.onCardClick(card);
@@ -89,6 +133,28 @@ class MemoryGame {
         }
         this.flipDuration = flipDuration;
         this.board.onCardClick = this.#handleCardClick.bind(this);
+        this.board.reset();
+    }
+
+    //Implementar el método `checkForMatch()` que verifica si las cartas volteadas coinciden. En caso de coincidir, las cartas deben ser añadidas al conjunto de cartas emparejadas. Es fundamental para que el método `#handleCardClick()` funcione correctamente.
+    checkForMatch() {
+        const [firstCard, secondCard] = this.flippedCards;
+        if (firstCard.matches(secondCard)) {
+            this.matchedCards.push(firstCard, secondCard);
+            this.flippedCards = [];
+        } else {
+            setTimeout(() => {
+                firstCard.toggleFlip();
+                secondCard.toggleFlip();
+                this.flippedCards = [];
+            }, this.flipDuration);
+        }
+    }
+
+    //Implementar el método `resetGame()` que reinicia el juego. Debe emplear otros métodos de la clase `MemoryGame` para realizar esta tarea.
+    resetGame() {
+        this.matchedCards = [];
+        this.flippedCards = [];
         this.board.reset();
     }
 
